@@ -1,15 +1,17 @@
-<ion-modal-view ng-controller="LoginCtrl">
+<ion-modal-view ng-controller="EmailCtrl">
   <ion-header-bar>
     <h1 class="title">Login</h1>
     <div class="buttons">
-      <button class="button button-clear" ng-click="closeLogin()">Close</button>
+      <!-- <button class="button button-clear" ng-click="hideLoginEmailPopup()">Close</button> -->
     </div>
   </ion-header-bar>
   <ion-content>
       <div class="list" ng-hide="signup">
         <label class="item item-input item-stacked-label">
           <span class="input-label">Email</span>
-          <input type="text" ng-model="credentials.username" placeholder="example@email.com">
+          <br>
+          <span class="input-label" style="color:red;" ng-show="emptyemail"> Please enter email</span>
+          <input type="text" ng-model="credentials.email" placeholder="example@email.com">
         </label>
         <label class="item item-input item-stacked-label">
           <span class="input-label">Password</span>
@@ -24,7 +26,7 @@
           <span class="input-label">Email</span>
           <br>
           <span class="input-label" style="color:red;" ng-show="emptyemail"> Please enter email</span>
-          <input type="text" ng-model="registerCredentials.username" placeholder="example@email.com">
+          <input type="text" ng-model="registerCredentials.email" placeholder="example@email.com">
         </label>
         <label class="item item-input item-stacked-label">
           <span class="input-label">Password</span>
@@ -37,11 +39,18 @@
           <input ng-model="registerCredentials.repassword" type="password">
         </label>
         <label class="item">
-          <!-- <button ng-hide="signup" ng-click="login(registerCredentials)" class="button button-block button-positive">Log in</button> -->
           <button ng-click="register(registerCredentials)" class="button button-block button-positive">Sign up</button>
         </label>
       </div>
-    <button ng-hide="signup" ng-click="signup=true" class="button button-clear button-positive">Don't have an account?</button>
+    <button ng-hide="signup" ng-click="signup=true" class="button button-clear button-positive"  style="margin:auto !important; display:block !important;">Create an account?</button>
     <button ng-show="signup" ng-click="signup=false" class="button button-clear button-assertive" style="margin:auto; display:block;">Cancel</button>
+    <button ng-hide="signup" ng-click="restorePassword(credentials)" class="button button-clear button-positive" style="margin:auto; display:block;">Restore password</button>
+
+    <div class="card" ng-show="message">
+      <div class="item item-text-wrap">
+        {{message}}
+      </div>
+    </div>
+
   </ion-content>
 </ion-modal-view>

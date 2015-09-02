@@ -58,6 +58,15 @@ angular.module('starter', ['ionic', 'starter.controllers'])
         }
       }
     })
+    .state('app.loginhome', {
+      url: '/loginhome',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/loginhome.html',
+          controller: 'LoginhomeCtrl'
+        }
+      }
+    })
 
   .state('app.single', {
     url: '/playlists/:playlistId',
