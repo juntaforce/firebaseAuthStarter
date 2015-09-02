@@ -29,6 +29,9 @@ angular.module('starter.controllers', ['auth'])
     AuthService.showLoginPopup();
   };
 
+  $scope.showProfile = function () {
+    AuthService.showProfilePopup();
+  }
   // Auth starter
   $scope.currentUser = null;
   $scope.userRoles = USER_ROLES;

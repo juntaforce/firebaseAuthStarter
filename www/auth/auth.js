@@ -24,35 +24,46 @@ angular.module('auth', [])
 .factory('AuthService', function ($http, Session, DB, $q, $ionicModal) {
   var authService = {}
  
-  // PUBLIC METHOD
-  authService.showLoginPopup = function (credentials) {
-    return $q(function (resolve, reject) {
-      $ionicModal.fromTemplateUrl('auth/login.html').then(function(modal) {
-        authService.modal = modal;
-        authService.modal.show();
-      });
+  // 1 GROUP PUBLIC METHOD
+  authService.showLoginPopup = function () {
+    $ionicModal.fromTemplateUrl('auth/login.html').then(function(modal) {
+      authService.loginModal = modal;
+      authService.loginModal.show();
     });
   }
 
-  // PUBLIC METHOD
-  authService.hideLoginPopup = function (credentials) {
-    return $q(function (resolve, reject) {
-      authService.modal.hide();
+  // 1 GROUP PUBLIC METHOD
+  authService.hideLoginPopup = function () {
+    authService.loginModal.hide();
+  }
+
+  // 1 GROUP PUBLIC METHOD
+  authService.showProfilePopup = function () {
+    $ionicModal.fromTemplateUrl('auth/profile.html').then(function(modal) {
+      authService.profileModal = modal;
+      authService.profileModal.show();
     });
   }
 
+  // 1 GROUP PUBLIC METHOD
+  authService.hideProfilePopup = function () {
+    authService.profileModal.hide();  
+  }
+
+  // 2 GROUP PUBLIC METHOD
   authService.logout = function () {
-    return $q(function (resolve, reject) {
+    // return $q(function (resolve, reject) {
       var ref = new Firebase(DB.url);
       ref.unauth();
       Session.destroy();
-      resolve({ 
-        success : true,
-        data : "Successfully logged out" 
-      });
-    });
+      // resolve({ 
+      //   success : true,
+      //   data : "Successfully logged out" 
+      // });
+    // });
   }
 
+  // 2 GROUP PUBLIC METHOD
   authService.loginEmail = function (credentials) {
     return $q(function (resolve, reject) {
       var ref = new Firebase(DB.url);
@@ -168,7 +179,7 @@ angular.module('auth', [])
   };
 
   authService.isAuthenticated = function () {
-    return !!Session.user;
+      return !!Session.user;
   };
  
   // authService.isAuthorized = function (authorizedRoles) {
@@ -215,7 +226,6 @@ angular.module('auth', [])
           password: ''
         }
         AuthService.hideLoginPopup()
-        console.log(Session.user)
       } else {
         $scope.message = result.data;
         $timeout(function() {
@@ -299,4 +309,26 @@ angular.module('auth', [])
   $scope.hideLoginPopup = function () {
     AuthService.hideLoginPopup()
   }
+})
+
+.controller('ProfileCtrl', function ($scope, $rootScope, Session, AuthService) {
+  $scope.hideProfilePopup = function () {
+    AuthService.hideProfilePopup();
+  }
+  if (!AuthService.isAuthenticated()) {
+    AuthService.showLoginPopup();
+  } else {
+    $scope.user = Session.user;
+  }
+
+  $scope.logout = function () {
+    AuthService.logout();
+    console.log(Session.user);
+    AuthService.hideProfilePopup();
+  }
 });
+
+
+
+
+
