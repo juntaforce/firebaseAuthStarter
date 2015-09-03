@@ -5,6 +5,7 @@ angular.module('auth', [])
 .constant('AUTH_EVENTS', {
   loginSuccess: 'auth-login-success',
   loginFailed: 'auth-login-failed',
+  sessionUpdated: 'session-updated',
   logoutSuccess: 'auth-logout-success',
   sessionTimeout: 'auth-session-timeout',
   notAuthenticated: 'auth-not-authenticated',
@@ -21,7 +22,7 @@ angular.module('auth', [])
 })
 
 // SERVICES
-.factory('AuthService', function ($http, Session, DB, $q, $ionicModal) {
+.factory('AuthService', function ($http, Session, DB, $q, $ionicModal, $rootScope, AUTH_EVENTS) {
   var authService = {}
  
   // 1 GROUP PUBLIC METHOD
@@ -51,19 +52,6 @@ angular.module('auth', [])
   }
 
   // 2 GROUP PUBLIC METHOD
-  authService.logout = function () {
-    // return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);
-      ref.unauth();
-      Session.destroy();
-      // resolve({ 
-      //   success : true,
-      //   data : "Successfully logged out" 
-      // });
-    // });
-  }
-
-  // 2 GROUP PUBLIC METHOD
   authService.loginEmail = function (credentials) {
     return $q(function (resolve, reject) {
       var ref = new Firebase(DB.url);
@@ -77,10 +65,37 @@ angular.module('auth', [])
             data : error.message 
           });
         } else {
-          Session.create(authData);
-          resolve({ 
-            success : true,
-            data : authData 
+          ref.child('users').child(authData.uid).once('value', function (snapshot) {
+            if (snapshot.val()) {
+              Session.create(snapshot.val());
+              resolve({ 
+                success : true,
+                data : "Successfully logged in" 
+              });
+            } else {
+              var userData = {
+                uid : authData.uid,
+                provider : authData.provider,
+                email : authData[authData.provider].email,
+                displayName : authData[authData.provider].email,
+                profileImageURL : authData[authData.provider].profileImageURL
+              }
+              Session.create(userData);
+              ref.child('users').child(authData.uid).set(userData, function (error) {
+                if (!error) {
+                  resolve({ 
+                    success : true,
+                    data : "Successfully saved User data" 
+                  });
+                } else {
+                  resolve({ 
+                    success : false,
+                    data : "Could not save User data" 
+                  });
+                  console.log(error);
+                }
+              });
+            }
           });
         }
       });
@@ -124,7 +139,6 @@ angular.module('auth', [])
         email    : credentials.email,
         password : credentials.password
       }, function (error, userData) {
-
         if (error) {
           switch (error.code) {
             case "EMAIL_TAKEN":
@@ -146,20 +160,55 @@ angular.module('auth', [])
               });
           }
         } else {
-          ref.authWithPassword({
-            email    : credentials.email,
-            password : credentials.password
-          }, function (error, authData) {
-            if (error) {
-              resolve({
-                success: false,
-                data: "Error while loggin in."
+          resolve({ 
+            success : true,
+            data : "Successfully registered User" 
+          });
+        }
+      });
+    });
+  }
+
+  authService.loginFacebook = function () {
+    return $q(function (resolve, reject) {
+      var ref = new Firebase(DB.url);  
+      ref.authWithOAuthPopup("facebook", function (error, authData) {
+        if (error) {
+          resolve({ 
+            success : false,
+            data : error.message 
+          });
+        } else {
+          ref.child('users').child(authData.uid).once('value', function (snapshot) {
+            if (snapshot.val()) {
+              Session.create(snapshot.val());
+              resolve({ 
+                success : true,
+                data : "Successfully logged in" 
               });
             } else {
-              Session.create(authData);
-              resolve({
-                success: true,
-                data: authData
+              var userData = {
+                uid : authData.uid,
+                access_token : authData[authData.provider].accessToken,
+                provider : authData.provider,
+                email : authData[authData.provider].email,
+                displayName : authData[authData.provider].displayName,
+                profileImageURL : authData[authData.provider].profileImageURL
+              }
+              Session.create(userData);
+              ref.child('users').child(authData.uid).set(userData, function (error) {
+                if (!error) {
+                  resolve({ 
+                    success : true,
+                    data : "Successfully saved User data" 
+                  });
+                } else {
+                  resolve({ 
+                    success : false,
+                    data : "Could not save User data" 
+                  });
+                  console.log(error);
+                }
               });
             }
           });
@@ -168,42 +217,146 @@ angular.module('auth', [])
     });
   }
 
-  authService.loginFacebook = function (credentials) {
-    return $http
-      .post('/login', credentials)
-      .then(function (res) {
-        Session.create(res.data.id, res.data.user.id,
-                       res.data.user.role);
-        return res.data.user;
+  authService.loginGoogle = function () {
+    return $q(function (resolve, reject) {
+      var ref = new Firebase(DB.url);  
+      ref.authWithOAuthPopup("google", function (error, authData) {
+        if (error) {
+          resolve({ 
+            success : false,
+            data : error.message 
+          });
+        } else {
+          console.log(authData)
+          ref.child('users').child(authData.uid).once('value', function (snapshot) {
+            if (snapshot.val()) {
+              Session.create(snapshot.val());
+              resolve({ 
+                success : true,
+                data : "Successfully logged in" 
+              });
+            } else {
+              var userData = {
+                uid : authData.uid,
+                email : authData[authData.provider].cachedUserProfile.email,
+                access_token : authData[authData.provider].accessToken,
+                provider : authData.provider,
+                displayName : authData[authData.provider].displayName,
+                profileImageURL : authData[authData.provider].profileImageURL
+              }
+              Session.create(userData);
+              ref.child('users').child(authData.uid).set(userData, function (error) {
+                if (!error) {
+                  resolve({ 
+                    success : true,
+                    data : "Successfully saved User data" 
+                  });
+                } else {
+                  resolve({ 
+                    success : false,
+                    data : "Could not save User data" 
+                  });
+                  console.log(error);
+                }
+              });
+            }
+          });
+        }
+      }, {
+        scope: "email"
       });
-  };
+    });
+  }
 
   authService.isAuthenticated = function () {
       return !!Session.user;
-  };
- 
-  // authService.isAuthorized = function (authorizedRoles) {
-  //   if (!angular.isArray(authorizedRoles)) {
-  //     authorizedRoles = [authorizedRoles];
-  //   }
-  //   return (authService.isAuthenticated() &&
-  //     authorizedRoles.indexOf(Session.userRole) !== -1);
-  // };
- 
+  }
+
+  authService.changePassword = function (credentials) {
+    return $q(function (resolve, reject) {
+      if (credentials.password && credentials.newpassword && credentials.email) {
+        var ref = new Firebase(DB.url);  
+        ref.changePassword({
+          email: credentials.email,
+          oldPassword: credentials.password,
+          newPassword: credentials.newpassword
+        }, function(error) {
+          if (error) {
+            switch (error.code) {
+              case "INVALID_PASSWORD":
+                resolve({
+                  success : false,
+                  data : "The specified user account password is incorrect."
+                })
+                break;
+              case "INVALID_USER":
+                resolve({
+                  success : false,
+                  data : "The specified user account does not exist."
+                })
+                break;
+              default:
+                resolve({
+                  success : false,
+                  data : error.message
+                })
+            }
+          } else {
+            resolve({
+              success : true,
+              data : "User password changed successfully!"
+            })
+          }
+        });
+      };
+    });
+  }
+
+  authService.updateProfile = function (user) {
+    return $q(function (resolve, reject) {
+      var ref = new Firebase(DB.url);
+      ref.child('users').child(user.uid).set(user, function (error) {
+        if (!error) {
+          resolve({
+            success : true,
+            data : "Profile successfully updated"
+          });
+        } else {
+          resolve({
+            success : false,
+            data : "Could not update profile"
+          });
+        }
+      });
+    });
+  }
+
+
+
+  // 2 GROUP PUBLIC METHOD
+  authService.logout = function () {
+      var ref = new Firebase(DB.url);
+      ref.unauth();
+      Session.destroy();
+      $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+  }
+
   return authService;
 })
 
 .service('Session', function () {
-  this.create = function (authData) {
-    this.user = authData
+  this.create = function (userData) {
+    this.user = userData;
+    window.localStorage.setItem("ionicUser", JSON.stringify(userData));
   };
   this.destroy = function () {
     this.user = null;
+     window.localStorage.removeItem("ionicUser");
   };
 })
 
 // CONTROLLERS
-.controller('EmailCtrl', function ($scope, $rootScope, AUTH_EVENTS, Session, AuthService, $timeout) {
+.controller('LoginCtrl', function ($scope, $rootScope, AUTH_EVENTS, Session, AuthService, $timeout, $ionicLoading) {
   $scope.credentials = {
     email: '',
     password: ''
@@ -217,14 +370,12 @@ angular.module('auth', [])
   $scope.wrongconfirm = false;
   $scope.emptyemail = false;
 
-  $scope.login = function (credentials) {
-    AuthService.loginEmail(credentials).then(function (result) {
+  $scope.loginFacebook = function () {
+    $ionicLoading.show();
+    AuthService.loginFacebook().then(function (result) {
       if (result.success) {
         $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-        $scope.credentials = {
-          email: '',
-          password: ''
-        }
+        $ionicLoading.hide();
         AuthService.hideLoginPopup()
       } else {
         $scope.message = result.data;
@@ -233,11 +384,51 @@ angular.module('auth', [])
         }, 3000);
         $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
       }
+    })
+  }
+  $scope.loginGoogle = function () {
+    $ionicLoading.show();
+    AuthService.loginGoogle().then(function (result) {
+      if (result.success) {
+        $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+        $ionicLoading.hide();
+        AuthService.hideLoginPopup()
+      } else {
+        $scope.message = result.data;
+        $timeout(function() {
+          $scope.message = null;
+        }, 3000);
+        $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+      }
+    })
+  }
+
+  $scope.loginEmail = function (credentials) {
+    $ionicLoading.show();
+    AuthService.loginEmail(credentials).then(function (result) {
+      if (result.success) {
+        $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+        $scope.credentials = {
+          email: '',
+          password: ''
+        }
+        $ionicLoading.hide();
+        AuthService.hideLoginPopup()
+      } else {
+        $scope.message = result.data;
+        $ionicLoading.hide();
+        $timeout(function() {
+          $scope.message = null;
+        }, 3000);
+        $rootScope.$broadcast(AUTH_EVENTS.loginFailed);
+      }
     });
   }
 
-  $scope.register = function (registerCredentials) {
-    // Email
+  $scope.registerEmail = function (registerCredentials) {
+    $ionicLoading.show();
+    
+    // Email validation
     if (registerCredentials.email=='') {
       $scope.emptyemail = true;
     } else {
@@ -252,17 +443,34 @@ angular.module('auth', [])
     }
 
     if (!$scope.wrongconfirm && !$scope.emptyemail) {
+      // Registering User
       AuthService.registerEmail(registerCredentials).then(function (result) {
         if (result.success) {
-          $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
-          $scope.registerCredentials = {
-            email: '',
-            password: '',
-            repassword: ''
-          }
-          AuthService.hideLoginPopup()
-          console.log(Session.user)
+
+          // Logging user in if registration succeeds
+          AuthService.loginEmail(registerCredentials).then(function (result) {
+            if (result.success) {
+              $scope.registerCredentials = {
+                email: '',
+                password: '',
+                repassword: ''
+              }
+              $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+              $ionicLoading.hide();
+              AuthService.hideLoginPopup()
+            } else {
+              // Error results of login
+              $ionicLoading.hide();
+              $scope.message = result.data;
+              $timeout(function() {
+                $scope.message = null;
+              }, 3000);    
+            }
+          });
+
         } else {
+          // Error results of registration
+          $ionicLoading.hide();
           $scope.message = result.data;
           $timeout(function() {
             $scope.message = null;
@@ -303,15 +511,19 @@ angular.module('auth', [])
         }
       });
     };
-
   }
-
   $scope.hideLoginPopup = function () {
     AuthService.hideLoginPopup()
   }
 })
 
-.controller('ProfileCtrl', function ($scope, $rootScope, Session, AuthService) {
+.controller('ProfileCtrl', function ($scope, $rootScope, Session, AuthService, $ionicPopup, AUTH_EVENTS, $timeout) {
+  $scope.changesSaved = true;
+
+  $rootScope.$on('session-updated', function () {
+    $scope.user = Session.user
+  });
+  
   $scope.hideProfilePopup = function () {
     AuthService.hideProfilePopup();
   }
@@ -321,9 +533,68 @@ angular.module('auth', [])
     $scope.user = Session.user;
   }
 
+  $scope.saveChanges = function (credentials) {
+    var confirmPopup = $ionicPopup.confirm({
+       title: 'Edit profile',
+       template: 'Are you sure you want to save changes to your profile?'
+    });
+    confirmPopup.then(function(res) {
+      if(res) {
+        AuthService.changePassword(credentials).then(function (result) {
+          if (result.success) { 
+            // Showing message result
+            $scope.message = result.data;
+            $timeout(function() {
+              $scope.message = null;
+              $scope.credentials.password = ""
+              $scope.credentials.newpassword = ""
+              $scope.changesSaved = true;
+            }, 3000);
+
+          } else {
+            $scope.message = result.data;
+            $timeout(function() {
+              $scope.changesSaved = false;
+              $scope.message = null;
+            }, 3000);
+          }
+        });
+
+        // Updating session (current user)
+        Session.user.displayName = credentials.displayName;
+        AuthService.updateProfile(Session.user).then(function (result) {
+          if (result.success) {
+            $scope.message = result.data;
+            $rootScope.$broadcast(AUTH_EVENTS.sessionUpdated);
+            $timeout(function() {
+              $scope.changesSaved = true;
+              $scope.message = null;
+            }, 3000);
+          } else {
+            $scope.message = result.data;
+            $timeout(function() {
+              $scope.changesSaved = false;
+              $scope.message = null;
+            }, 3000);
+          }
+        })
+      }
+    });
+  }
+
+  $scope.changesMade = function () {
+    $scope.changesSaved = false;
+  }
+
+  $scope.credentials = {
+    email : Session.user.email,
+    displayName : Session.user.displayName,
+    password : "",
+    newpassword : ""
+  }
+
   $scope.logout = function () {
     AuthService.logout();
-    console.log(Session.user);
     AuthService.hideProfilePopup();
   }
 });

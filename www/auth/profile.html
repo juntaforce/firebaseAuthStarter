@@ -6,38 +6,44 @@
     </div>
   </ion-header-bar>
   <ion-content>
+    <div class="card" ng-show="message" style="position: absolute; z-index: 1000; bottom: 0;">
+      <div style="background-color: #E0D140;" class="item item-text-wrap">
+        {{message}}
+      </div>
+    </div>
     <div class="list card">
 
       <div class="item item-avatar">
-        <img ng-src="{{user[user.provider].profileImageURL}}">
-        <h2>{{user[user.provider].email}}</h2>
-        <p>Welcome, dear User!</p>
+        <img ng-src="{{user.profileImageURL}}">
+        <h2>{{user.displayName}}</h2>
+        <p>{{user.email}}</p>
       </div>
 
-<!--       <div class="item item-body">
-        <img class="full-image" src="delorean.jpg">
-        <p>
-          This is a "Facebook" styled Card. The header is created from a Thumbnail List item,
-          the content is from a card-body consisting of an image and paragraph text. The footer
-          consists of tabs, icons aligned left, within the card-footer.
-        </p>
-        <p>
-          <a href="#" class="subdued">1 Like</a>
-          <a href="#" class="subdued">5 Comments</a>
-        </p>
-      </div> -->
+      <div class="item item-body">
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">Tap to edit display name</span>
+          <input type="text" ng-change="changesMade()" ng-model="credentials.displayName" placeholder="John">
+        </label>
+        <label ng-show="user.provider=='password'" class="item item-input item-stacked-label">
+          <span class="input-label">Edit password</span>
+          <input ng-change="changesMade()" type="password" ng-model="credentials.password" placeholder="Old password">
+        </label>
+        <label ng-show="user.provider=='password'" class="item item-input item-stacked-label">
+          <input ng-change="changesMade()" ng-model="credentials.newpassword" type="password" placeholder="New password">
+        </label>
+        <button ng-show="!changesSaved" ng-hide="changesSaved" ng-click="saveChanges(credentials)" class="button button-clear button-positive" style="display:block; margin:auto;">
+          <i class="icon ion-unlocked"></i> 
+          Save changes
+        </button>
+        <button ng-show="changesSaved" class="button button-clear button-balanced" style="display:block; margin:auto;">
+          <i class="icon ion-locked"></i> 
+          Changes saved
+        </button>
+      </div>
 
       <div class="item tabs tabs-secondary tabs-icon-left">
-        <!-- <a class="tab-item" href="#">
-          <i class="icon ion-thumbsup"></i>
-          Like
-        </a>
-        <a class="tab-item" href="#">
-          <i class="icon ion-chatbox"></i>
-          Comment
-        </a> -->
         <a class="tab-item" href="#" ng-click="logout()">
-          <i class="icon ion-share"></i>
+          <i class="icon ion-log-out"></i>
           Logout
         </a>
       </div>

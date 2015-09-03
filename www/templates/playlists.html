@@ -1,9 +1,29 @@
-<ion-view view-title="Playlists">
+<ion-view view-title="Home">
   <ion-content>
-    <ion-list>
-      <ion-item ng-repeat="playlist in playlists" href="#/app/playlists/{{playlist.id}}">
-        {{playlist.title}}
-      </ion-item>
-    </ion-list>
+    <div class="list card">
+
+      <div class="item item-avatar" ng-show="user">
+        <img ng-src="{{user.profileImageURL}}">
+        <h2>{{user.displayName}}</h2>
+        <p>{{user.email}}</p>
+      </div>
+
+      <div class="item tabs tabs-secondary tabs-icon-left" ng-show="user">
+        <a class="tab-item" href="#" ng-click="showProfilePopup()">
+          <i class="icon ion-person"></i>
+          View account
+        </a>
+        <a class="tab-item" href="#" ng-click="logout()">
+          <i class="icon ion-log-out"></i>
+          Log out
+        </a>
+      </div>
+      <div class="item tabs tabs-secondary tabs-icon-left" ng-hide="user" ng-click="showLoginPopup()">
+        <a class="tab-item" href="#">
+          <i class="icon ion-log-in"></i>
+          Log in
+        </a>
+      </div>
+    </div>
   </ion-content>
 </ion-view>

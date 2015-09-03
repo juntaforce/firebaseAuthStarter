@@ -1,46 +1,31 @@
 angular.module('starter.controllers', ['auth'])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout, USER_ROLES, AuthService) {
+.controller('AppCtrl', function($scope, $rootScope, $ionicModal, $timeout, AuthService, Session) {
 
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-  AuthService.showLoginPopup();
-  // Form data for the login modal
-  $scope.loginData = {};
-
-  // Create the login modal that we will use later
-  // $ionicModal.fromTemplateUrl('auth/email.html', {
-  //   scope: $scope
-  // }).then(function(modal) {
-  //   $scope.modal = modal;
-  // });
-
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
-  };
-
-  // Open the login modal
-  $scope.showLogin = function() {
+  if (window.localStorage.getItem("ionicUser") != "undefined") {
+      Session.create(JSON.parse(window.localStorage.getItem("ionicUser")));
+      $scope.user = Session.user;
+  } else {
     AuthService.showLoginPopup();
-  };
+  }
 
-  $scope.showProfile = function () {
+  $rootScope.$on('auth-login-success', function () {
+    $scope.user = Session.user;
+  });
+  $rootScope.$on('auth-logout-success', function () {
+    $scope.user = null;
+  });
+
+  $scope.showProfilePopup = function () {
     AuthService.showProfilePopup();
   }
-  // Auth starter
-  $scope.currentUser = null;
-  $scope.userRoles = USER_ROLES;
-  $scope.isAuthorized = AuthService.isAuthorized;
- 
-  $scope.setCurrentUser = function (user) {
-    $scope.currentUser = user;
-  };
-  // -----------
+  $scope.showLoginPopup = function () {
+    AuthService.showLoginPopup();
+  }
+  $scope.logout = function () {
+    AuthService.logout();
+  }
+
 })
 
 .controller('PlaylistsCtrl', function($scope) {
