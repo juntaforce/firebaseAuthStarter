@@ -41,10 +41,15 @@ angular.module('auth', [])
 
   // 1 GROUP PUBLIC METHOD
   authService.showProfilePopup = function () {
-    $ionicModal.fromTemplateUrl('auth/profile.html').then(function(modal) {
-      authService.profileModal = modal;
-      authService.profileModal.show();
-    });
+    if (authService.isAuthenticated()) {
+      $ionicModal.fromTemplateUrl('auth/profile.html').then(function(modal) {
+        authService.profileModal = modal;
+        authService.profileModal.show();
+      });
+    } else {
+      console.log("No user is logged in to view Profile")
+      authService.showLoginPopup();
+    }
   }
 
   // 1 GROUP PUBLIC METHOD
@@ -332,8 +337,6 @@ angular.module('auth', [])
     });
   }
 
-
-
   // 2 GROUP PUBLIC METHOD
   authService.logout = function () {
       var ref = new Firebase(INFO.firebaseURL);
@@ -405,6 +408,7 @@ angular.module('auth', [])
   }
 
   $scope.loginEmail = function (credentials) {
+    console.log("Loggin via Email")
     $ionicLoading.show();
     AuthService.loginEmail(credentials).then(function (result) {
       if (result.success) {
@@ -586,7 +590,7 @@ angular.module('auth', [])
   $scope.changesMade = function () {
     $scope.changesSaved = false;
   }
-
+ 
   $scope.credentials = {
     email : Session.user.email,
     displayName : Session.user.displayName,

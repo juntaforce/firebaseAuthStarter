@@ -1,9 +1,8 @@
 angular.module('starter.controllers', ['auth'])
 
-.controller('AppCtrl', function($scope, $rootScope, $ionicModal, $timeout, AuthService, Session) {
-
-  if (window.localStorage.getItem("ionicUser") != "undefined") {
-      Session.create(JSON.parse(window.localStorage.getItem("ionicUser")));
+.controller('AppCtrl', function($scope, $rootScope, $ionicModal, $timeout, AuthService, Session, INFO) {
+  if (window.localStorage.getItem(INFO.applicationNAME+"User") != null) {
+      Session.create(JSON.parse(window.localStorage.getItem(INFO.applicationNAME+"User")));
       $scope.user = Session.user;
   } else {
     console.log("No user found in cookies")
