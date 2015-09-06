@@ -17,12 +17,13 @@ angular.module('auth', [])
   user: 'user'
 })
 
-.constant('DB', {
-  url: 'https://myauthstarter.firebaseio.com'
+.constant('INFO', {
+  applicationNAME: 'authStarter',
+  firebaseURL: 'https://myauthstarter.firebaseio.com'
 })
 
 // SERVICES
-.factory('AuthService', function ($http, Session, DB, $q, $ionicModal, $rootScope, AUTH_EVENTS) {
+.factory('AuthService', function ($http, Session, INFO, $q, $ionicModal, $rootScope, AUTH_EVENTS) {
   var authService = {}
  
   // 1 GROUP PUBLIC METHOD
@@ -54,7 +55,7 @@ angular.module('auth', [])
   // 2 GROUP PUBLIC METHOD
   authService.loginEmail = function (credentials) {
     return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);
+      var ref = new Firebase(INFO.firebaseURL);
       ref.authWithPassword({
         email    : credentials.email,
         password : credentials.password
@@ -104,7 +105,7 @@ angular.module('auth', [])
 
   authService.resetPassword = function (credentials) {
     return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);
+      var ref = new Firebase(INFO.firebaseURL);
       ref.resetPassword({
         email: credentials.email
       }, function(error) {
@@ -134,7 +135,7 @@ angular.module('auth', [])
 
   authService.registerEmail = function (credentials) {
     return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);
+      var ref = new Firebase(INFO.firebaseURL);
       ref.createUser({
         email    : credentials.email,
         password : credentials.password
@@ -171,7 +172,7 @@ angular.module('auth', [])
 
   authService.loginFacebook = function () {
     return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);  
+      var ref = new Firebase(INFO.firebaseURL);  
       ref.authWithOAuthPopup("facebook", function (error, authData) {
         if (error) {
           resolve({ 
@@ -219,7 +220,7 @@ angular.module('auth', [])
 
   authService.loginGoogle = function () {
     return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);  
+      var ref = new Firebase(INFO.firebaseURL);  
       ref.authWithOAuthPopup("google", function (error, authData) {
         if (error) {
           resolve({ 
@@ -275,7 +276,7 @@ angular.module('auth', [])
   authService.changePassword = function (credentials) {
     return $q(function (resolve, reject) {
       if (credentials.password && credentials.newpassword && credentials.email) {
-        var ref = new Firebase(DB.url);  
+        var ref = new Firebase(INFO.firebaseURL);  
         ref.changePassword({
           email: credentials.email,
           oldPassword: credentials.password,
@@ -314,7 +315,7 @@ angular.module('auth', [])
 
   authService.updateProfile = function (user) {
     return $q(function (resolve, reject) {
-      var ref = new Firebase(DB.url);
+      var ref = new Firebase(INFO.firebaseURL);
       ref.child('users').child(user.uid).set(user, function (error) {
         if (!error) {
           resolve({
@@ -335,7 +336,7 @@ angular.module('auth', [])
 
   // 2 GROUP PUBLIC METHOD
   authService.logout = function () {
-      var ref = new Firebase(DB.url);
+      var ref = new Firebase(INFO.firebaseURL);
       ref.unauth();
       Session.destroy();
       $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
@@ -344,14 +345,14 @@ angular.module('auth', [])
   return authService;
 })
 
-.service('Session', function () {
+.service('Session', function (INFO) {
   this.create = function (userData) {
     this.user = userData;
-    window.localStorage.setItem("ionicUser", JSON.stringify(userData));
+    window.localStorage.setItem(INFO.applicationNAME+'User', JSON.stringify(userData));
   };
   this.destroy = function () {
     this.user = null;
-     window.localStorage.removeItem("ionicUser");
+     window.localStorage.removeItem(INFO.applicationNAME+'User');
   };
 })
 

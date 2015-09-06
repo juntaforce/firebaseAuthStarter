@@ -6,6 +6,7 @@ angular.module('starter.controllers', ['auth'])
       Session.create(JSON.parse(window.localStorage.getItem("ionicUser")));
       $scope.user = Session.user;
   } else {
+    console.log("No user found in cookies")
     AuthService.showLoginPopup();
   }
 
