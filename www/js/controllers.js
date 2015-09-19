@@ -1,6 +1,7 @@
 angular.module('starter.controllers', ['auth'])
 
 .controller('AppCtrl', function($scope, $rootScope, $ionicModal, $timeout, AuthService, Session, INFO) {
+  
   if (window.localStorage.getItem(INFO.applicationNAME+"User") != null) {
       Session.create(JSON.parse(window.localStorage.getItem(INFO.applicationNAME+"User")));
       $scope.user = Session.user;

@@ -13,7 +13,38 @@ angular.module('starter', ['ionic', 'starter.controllers'])
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
       cordova.plugins.Keyboard.disableScroll(true);
+      // window.plugins.googleplus.isAvailable(
+      //     function (available) {
+      //       if (available) {
+      //         window.plugins.googleplus.login(
+      //             {
+      //               // 'scopes': '... ', // optional space-separated list of scopes, the default is sufficient for login and basic profile info
+      //               'offline': true, // optional and required for Android only - if set to true the plugin will also return the OAuth access token, that can be used to sign in to some third party services that don't accept a Cross-client identity token (ex. Firebase)
+      //               // 'webApiKey': 'api of web app', // optional API key of your Web application from Credentials settings of your project - if you set it the returned idToken will allow sign in to services like Azure Mobile Services
+      //               // there is no API key for Android; you app is wired to the Google+ API by listing your package name in the google dev console and signing your apk (which you have done in chapter 4)
+      //             },
+      //             function (obj) {
+      //               console.log(obj);
+      //               alert(JSON.stringify(obj)); // do something useful instead of alerting
+      //             },
+      //             function (msg) {
+      //               alert('error: ' + msg);
+      //             }
+      //         );
+      //       }
+      //     }
+      // );
+      var fbLoginSuccess = function (userData) {
+          alert("UserInfo: " + JSON.stringify(userData));
+          console.log(userData)
+      }
 
+      facebookConnectPlugin.login(["public_profile"],
+          fbLoginSuccess,
+          function (error) { 
+            console.log(error) 
+          }
+      );
     }
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
