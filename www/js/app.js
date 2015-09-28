@@ -34,17 +34,17 @@ angular.module('starter', ['ionic', 'starter.controllers'])
       //       }
       //     }
       // );
-      var fbLoginSuccess = function (userData) {
-          alert("UserInfo: " + JSON.stringify(userData));
-          console.log(userData)
-      }
+      // var fbLoginSuccess = function (userData) {
+      //     alert("UserInfo: " + JSON.stringify(userData));
+      //     console.log(userData)
+      // }
 
-      facebookConnectPlugin.login(["public_profile"],
-          fbLoginSuccess,
-          function (error) { 
-            console.log(error) 
-          }
-      );
+      // facebookConnectPlugin.login(["public_profile"],
+      //     fbLoginSuccess,
+      //     function (error) { 
+      //       console.log(error) 
+      //     }
+      // );
     }
     if (window.StatusBar) {
       // org.apache.cordova.statusbar required
