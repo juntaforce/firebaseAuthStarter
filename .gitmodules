@@ -1,0 +1,3 @@
+[submodule "www/lib/authonic"]
+	path = www/lib/authonic
+	url = https://github.com/markusila/authonic.git

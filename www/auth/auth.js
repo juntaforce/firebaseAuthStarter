@@ -539,6 +539,7 @@ angular.module('auth', [])
         $ionicLoading.hide();
         AuthService.hideLoginPopup()
       } else {
+        $ionicLoading.hide();
         $scope.message = result.data;
         $timeout(function() {
           $scope.message = null;
@@ -555,6 +556,7 @@ angular.module('auth', [])
         $ionicLoading.hide();
         AuthService.hideLoginPopup()
       } else {
+        $ionicLoading.hide();
         $scope.message = result.data;
         $timeout(function() {
           $scope.message = null;
